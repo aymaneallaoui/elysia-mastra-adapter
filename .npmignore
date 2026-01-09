@@ -1,0 +1,45 @@
+# Source files (we only publish dist)
+src/
+examples/
+*.ts
+!*.d.ts
+
+# Test files
+__tests__/
+*.test.ts
+*.spec.ts
+
+# Config files
+tsconfig*.json
+eslint.config.js
+.prettierrc
+.prettierignore
+.eslintignore
+.editorconfig
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+bun.lock
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Misc
+.env*
+coverage/

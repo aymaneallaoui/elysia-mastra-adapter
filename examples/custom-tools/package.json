@@ -1,0 +1,20 @@
+{
+  "name": "elysia-mastra-tools-example",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "elysia": "^1.4.21",
+    "@mastra/core": "^1.0.0-beta.20",
+    "@mastra/server": "^1.0.0-beta.20",
+    "elysia-mastra": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}

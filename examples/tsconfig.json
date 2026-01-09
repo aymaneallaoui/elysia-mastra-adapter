@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Override noEmit since examples might want to be compiled
+    "noEmit": false,
+    // Allow more lenient settings for examples
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    // Examples might use any for demonstration purposes
+    "noImplicitAny": false
+  },
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules"
+  ]
+}
