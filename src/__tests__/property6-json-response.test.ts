@@ -1,6 +1,6 @@
 /**
  * Property-based tests for ElysiaServer - Property 6: JSON Response Handling
- * 
+ *
  * Uses fast-check to verify universal properties across many generated inputs.
  */
 
@@ -12,7 +12,7 @@ import type { Mastra } from '@mastra/core/mastra';
 
 /**
  * Feature: elysia-mastra-adapter, Property 6: JSON Response Handling
- * 
+ *
  * For any route with `responseType: 'json'`, `sendResponse()` SHALL return
  * the result as a JSON response with appropriate Content-Type header.
  */
@@ -31,7 +31,7 @@ describe('Property 6: JSON Response Handling', () => {
   const jsonPrimitiveArb = fc.oneof(
     fc.string({ minLength: 1, maxLength: 50 }),
     fc.integer(),
-    fc.double({ noNaN: true, noDefaultInfinity: true }).map(n => Object.is(n, -0) ? 0 : n),
+    fc.double({ noNaN: true, noDefaultInfinity: true }).map((n) => (Object.is(n, -0) ? 0 : n)),
     fc.boolean()
   );
 
@@ -55,57 +55,56 @@ describe('Property 6: JSON Response Handling', () => {
 
   test('returns JSON-parseable response for object results', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        jsonObjectArb,
-        pathArb,
-        async (expectedResult, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(jsonObjectArb, pathArb, async (expectedResult, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => expectedResult,
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => expectedResult,
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
 
-          const body = await response.json();
-          expect(body).toEqual(expectedResult);
+        const body = await response.json();
+        expect(body).toEqual(expectedResult);
 
-          const contentType = response.headers.get('content-type');
-          if (contentType) {
-            expect(contentType).toContain('json');
-          }
-
-          return true;
+        const contentType = response.headers.get('content-type');
+        if (contentType) {
+          expect(contentType).toContain('json');
         }
-      ),
+
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('returns JSON-parseable response for complex nested objects', async () => {
     // Generate ISO date strings directly to avoid any Date parsing issues
-    const validDateArb = fc.tuple(
-      fc.integer({ min: 2000, max: 2030 }),
-      fc.integer({ min: 1, max: 12 }),
-      fc.integer({ min: 1, max: 28 }),
-      fc.integer({ min: 0, max: 23 }),
-      fc.integer({ min: 0, max: 59 }),
-      fc.integer({ min: 0, max: 59 })
-    ).map(([year, month, day, hour, min, sec]) => 
-      `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}.000Z`
-    );
+    const validDateArb = fc
+      .tuple(
+        fc.integer({ min: 2000, max: 2030 }),
+        fc.integer({ min: 1, max: 12 }),
+        fc.integer({ min: 1, max: 28 }),
+        fc.integer({ min: 0, max: 23 }),
+        fc.integer({ min: 0, max: 59 }),
+        fc.integer({ min: 0, max: 59 })
+      )
+      .map(
+        ([year, month, day, hour, min, sec]) =>
+          `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}.000Z`
+      );
 
     const complexObjectArb = fc.record({
       id: fc.integer({ min: 1, max: 10000 }),
@@ -120,36 +119,32 @@ describe('Property 6: JSON Response Handling', () => {
     });
 
     await fc.assert(
-      fc.asyncProperty(
-        complexObjectArb,
-        pathArb,
-        async (expectedResult, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(complexObjectArb, pathArb, async (expectedResult, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => expectedResult,
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => expectedResult,
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
 
-          const body = await response.json();
-          expect(body).toEqual(expectedResult);
+        const body = await response.json();
+        expect(body).toEqual(expectedResult);
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
@@ -199,75 +194,67 @@ describe('Property 6: JSON Response Handling', () => {
 
   test('returns JSON-parseable response for array results', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        jsonArrayArb,
-        pathArb,
-        async (expectedResult, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(jsonArrayArb, pathArb, async (expectedResult, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => expectedResult,
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => expectedResult,
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
 
-          const body = await response.json() as Array<{ id: number; value: string }>;
-          expect(body).toEqual(expectedResult);
-          expect(Array.isArray(body)).toBe(true);
-          expect(body.length).toBe(expectedResult.length);
+        const body = (await response.json()) as Array<{ id: number; value: string }>;
+        expect(body).toEqual(expectedResult);
+        expect(Array.isArray(body)).toBe(true);
+        expect(body.length).toBe(expectedResult.length);
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('JSON response round-trip preserves data integrity for objects', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        jsonObjectArb,
-        pathArb,
-        async (originalData, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(jsonObjectArb, pathArb, async (originalData, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => originalData,
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => originalData,
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
 
-          const body = await response.json();
-          const roundTripped = JSON.parse(JSON.stringify(originalData));
-          expect(body).toEqual(roundTripped);
+        const body = await response.json();
+        const roundTripped = JSON.parse(JSON.stringify(originalData));
+        expect(body).toEqual(roundTripped);
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });

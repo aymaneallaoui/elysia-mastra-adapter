@@ -1,6 +1,6 @@
 /**
  * Property-based tests for ElysiaServer - Property 8: Error Status Codes
- * 
+ *
  * Uses fast-check to verify universal properties across many generated inputs.
  */
 
@@ -12,7 +12,7 @@ import type { Mastra } from '@mastra/core/mastra';
 
 /**
  * Feature: elysia-mastra-adapter, Property 8: Error Status Codes
- * 
+ *
  * For any error thrown during request handling:
  * - Validation errors SHALL return status 400
  * - Internal errors SHALL return status 500
@@ -37,19 +37,30 @@ describe('Property 8: Error Status Codes', () => {
     fc.constant('Validation failed'),
     fc.constant('Invalid input'),
     fc.constant('validation error: field is required'),
-    fc.stringMatching(/^[a-zA-Z ]{5,30}$/).map(s => `validation: ${s}`),
+    fc.stringMatching(/^[a-zA-Z ]{5,30}$/).map((s) => `validation: ${s}`)
   );
 
   const internalErrorMessageArb = fc.oneof(
     fc.constant('Database connection failed'),
     fc.constant('Unexpected error'),
     fc.constant('Service unavailable'),
-    fc.stringMatching(/^[a-zA-Z ]{5,30}$/),
+    fc.stringMatching(/^[a-zA-Z ]{5,30}$/)
   );
 
   const explicitStatusArb = fc.constantFrom(
-    400, 401, 403, 404, 405, 409, 422, 429,
-    500, 501, 502, 503, 504
+    400,
+    401,
+    403,
+    404,
+    405,
+    409,
+    422,
+    429,
+    500,
+    501,
+    502,
+    503,
+    504
   );
 
   const clientErrorStatusArb = fc.constantFrom(400, 401, 403, 404, 405, 409, 422, 429);
@@ -58,166 +69,150 @@ describe('Property 8: Error Status Codes', () => {
 
   test('returns 400 for validation errors (ZodError) for any invalid input', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        pathArb,
-        validationErrorMessageArb,
-        async (path, errorMessage) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(pathArb, validationErrorMessageArb, async (path, errorMessage) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => {
-              const error = new Error(errorMessage) as Error & { 
-                name: string; 
-                issues: Array<{ message: string }>;
-              };
-              error.name = 'ZodError';
-              error.issues = [{ message: errorMessage }];
-              throw error;
-            },
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => {
+            const error = new Error(errorMessage) as Error & {
+              name: string;
+              issues: Array<{ message: string }>;
+            };
+            error.name = 'ZodError';
+            error.issues = [{ message: errorMessage }];
+            throw error;
+          },
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(400);
+        expect(response.status).toBe(400);
 
-          const body = await response.json() as { error: string; message: string };
-          expect(body.error).toBe('VALIDATION_ERROR');
-          expect(body.message).toBeDefined();
+        const body = (await response.json()) as { error: string; message: string };
+        expect(body.error).toBe('VALIDATION_ERROR');
+        expect(body.message).toBeDefined();
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('returns 400 for errors with status 400 for any error message', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        pathArb,
-        validationErrorMessageArb,
-        async (path, errorMessage) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(pathArb, validationErrorMessageArb, async (path, errorMessage) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => {
-              const error = new Error(errorMessage) as Error & { status: number };
-              error.status = 400;
-              throw error;
-            },
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => {
+            const error = new Error(errorMessage) as Error & { status: number };
+            error.status = 400;
+            throw error;
+          },
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(400);
+        expect(response.status).toBe(400);
 
-          const body = await response.json() as { error: string };
-          expect(body.error).toBe('VALIDATION_ERROR');
+        const body = (await response.json()) as { error: string };
+        expect(body.error).toBe('VALIDATION_ERROR');
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('returns 400 for errors with details.status 400 for any error message', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        pathArb,
-        validationErrorMessageArb,
-        async (path, errorMessage) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(pathArb, validationErrorMessageArb, async (path, errorMessage) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => {
-              const error = new Error(errorMessage) as Error & { 
-                details: { status: number };
-              };
-              error.details = { status: 400 };
-              throw error;
-            },
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => {
+            const error = new Error(errorMessage) as Error & {
+              details: { status: number };
+            };
+            error.details = { status: 400 };
+            throw error;
+          },
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(400);
+        expect(response.status).toBe(400);
 
-          const body = await response.json() as { error: string };
-          expect(body.error).toBe('VALIDATION_ERROR');
+        const body = (await response.json()) as { error: string };
+        expect(body.error).toBe('VALIDATION_ERROR');
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('returns 500 for internal errors without explicit status for any error', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        pathArb,
-        internalErrorMessageArb,
-        async (path, errorMessage) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
+      fc.asyncProperty(pathArb, internalErrorMessageArb, async (path, errorMessage) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
 
-          const server = new ElysiaServer({ app, mastra });
+        const server = new ElysiaServer({ app, mastra });
 
-          server.registerContextMiddleware();
+        server.registerContextMiddleware();
 
-          const route = {
-            path,
-            method: 'GET' as const,
-            handler: async () => {
-              throw new Error(errorMessage);
-            },
-            responseType: 'json' as const,
-          };
+        const route = {
+          path,
+          method: 'GET' as const,
+          handler: async () => {
+            throw new Error(errorMessage);
+          },
+          responseType: 'json' as const,
+        };
 
-          await server.registerRoute(app, route, {});
+        await server.registerRoute(app, route, {});
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(500);
+        expect(response.status).toBe(500);
 
-          const body = await response.json() as { error: string; message: string };
-          expect(body.error).toBe('INTERNAL_ERROR');
-          expect(body.message).toBe('An unexpected error occurred');
+        const body = (await response.json()) as { error: string; message: string };
+        expect(body.error).toBe('INTERNAL_ERROR');
+        expect(body.message).toBe('An unexpected error occurred');
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
@@ -278,7 +273,7 @@ describe('Property 8: Error Status Codes', () => {
             path,
             method: 'GET' as const,
             handler: async () => {
-              const error = new Error(errorMessage) as Error & { 
+              const error = new Error(errorMessage) as Error & {
                 details: { status: number };
               };
               error.details = { status: explicitStatus };
@@ -304,7 +299,7 @@ describe('Property 8: Error Status Codes', () => {
     await fc.assert(
       fc.asyncProperty(
         pathArb,
-        clientErrorStatusArb.filter(s => s !== 400),
+        clientErrorStatusArb.filter((s) => s !== 400),
         internalErrorMessageArb,
         async (path, clientErrorStatus, errorMessage) => {
           const app = new Elysia();
@@ -331,7 +326,7 @@ describe('Property 8: Error Status Codes', () => {
 
           expect(response.status).toBe(clientErrorStatus);
 
-          const body = await response.json() as { error: string; message: string };
+          const body = (await response.json()) as { error: string; message: string };
           expect(body.error).toBe('ERROR');
           expect(body.message).toBe(errorMessage);
 
@@ -373,7 +368,7 @@ describe('Property 8: Error Status Codes', () => {
 
           expect(response.status).toBe(serverErrorStatus);
 
-          const body = await response.json() as { error: string; message: string };
+          const body = (await response.json()) as { error: string; message: string };
           expect(body.error).toBe('INTERNAL_ERROR');
           expect(body.message).toBe('An unexpected error occurred');
 
@@ -407,8 +402,8 @@ describe('Property 8: Error Status Codes', () => {
             path,
             method: 'GET' as const,
             handler: async () => {
-              const error = new Error('Validation failed') as Error & { 
-                name: string; 
+              const error = new Error('Validation failed') as Error & {
+                name: string;
                 issues: typeof issues;
               };
               error.name = 'ZodError';
@@ -424,8 +419,8 @@ describe('Property 8: Error Status Codes', () => {
 
           expect(response.status).toBe(400);
 
-          const body = await response.json() as { 
-            error: string; 
+          const body = (await response.json()) as {
+            error: string;
             details: Array<{ path: string[]; message: string }>;
           };
           expect(body.error).toBe('VALIDATION_ERROR');
@@ -457,7 +452,7 @@ describe('Property 8: Error Status Codes', () => {
             path,
             method: 'GET' as const,
             handler: async () => {
-              const error = new Error('Test error') as Error & { 
+              const error = new Error('Test error') as Error & {
                 status: number;
                 details: { status: number };
               };

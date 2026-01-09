@@ -28,8 +28,9 @@ import type { MastraPluginOptions, MastraDeriveContext } from './types';
 export function mastra(options: MastraPluginOptions) {
   const { mastra: mastraInstance, tools = {}, taskStore } = options;
 
-  return new Elysia({ name: 'mastra' })
-    .derive({ as: 'global' }, ({ request }): MastraDeriveContext => {
+  return new Elysia({ name: 'mastra' }).derive(
+    { as: 'global' },
+    ({ request }): MastraDeriveContext => {
       // Create AbortController and connect to request lifecycle
       const abortController = new AbortController();
 
@@ -72,7 +73,8 @@ export function mastra(options: MastraPluginOptions) {
         abortSignal: abortController.signal,
         taskStore,
       };
-    });
+    }
+  );
 }
 
 /**

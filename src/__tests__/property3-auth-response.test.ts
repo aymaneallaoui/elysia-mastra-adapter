@@ -1,6 +1,6 @@
 /**
  * Property-based tests for ElysiaServer - Property 3: Authentication Response Codes
- * 
+ *
  * Uses fast-check to verify universal properties across many generated inputs.
  */
 
@@ -12,7 +12,7 @@ import type { Mastra } from '@mastra/core/mastra';
 
 /**
  * Feature: elysia-mastra-adapter, Property 3: Authentication Response Codes
- * 
+ *
  * For any request where authentication is configured:
  * - If authentication fails, response status SHALL be 401
  * - If authorization fails, response status SHALL be 403
@@ -25,7 +25,7 @@ describe('Property 3: Authentication Response Codes', () => {
     authorizeUser?: (user: unknown, request: unknown) => Promise<boolean> | boolean;
   }) => {
     return {
-      getServer: () => authConfig ? { auth: authConfig } : null,
+      getServer: () => (authConfig ? { auth: authConfig } : null),
       getAgent: () => null,
       getWorkflow: () => null,
       getTools: () => ({}),
@@ -49,35 +49,31 @@ describe('Property 3: Authentication Response Codes', () => {
 
   test('returns 401 when authentication fails for any invalid token', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        tokenArb,
-        pathArb,
-        async (invalidToken, path) => {
-          const app = new Elysia();
-          
-          const mastra = createMockMastraWithAuth({
-            authenticateToken: async () => null,
-          });
+      fc.asyncProperty(tokenArb, pathArb, async (invalidToken, path) => {
+        const app = new Elysia();
 
-          const server = new ElysiaServer({ app, mastra });
-          server.registerAuthMiddleware();
+        const mastra = createMockMastraWithAuth({
+          authenticateToken: async () => null,
+        });
 
-          app.get(path, () => ({ ok: true }));
+        const server = new ElysiaServer({ app, mastra });
+        server.registerAuthMiddleware();
 
-          const response = await app.handle(
-            new Request(`http://localhost${path}`, {
-              headers: { Authorization: `Bearer ${invalidToken}` },
-            })
-          );
+        app.get(path, () => ({ ok: true }));
 
-          expect(response.status).toBe(401);
-          
-          const body = await response.json();
-          expect(body).toEqual({ error: 'Unauthorized' });
+        const response = await app.handle(
+          new Request(`http://localhost${path}`, {
+            headers: { Authorization: `Bearer ${invalidToken}` },
+          })
+        );
 
-          return true;
-        }
-      ),
+        expect(response.status).toBe(401);
+
+        const body = await response.json();
+        expect(body).toEqual({ error: 'Unauthorized' });
+
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
@@ -91,7 +87,7 @@ describe('Property 3: Authentication Response Codes', () => {
         httpMethodArb,
         async (validToken, user, path, method) => {
           const app = new Elysia();
-          
+
           const mastra = createMockMastraWithAuth({
             authenticateToken: async () => user,
             authorize: async () => false,
@@ -114,7 +110,7 @@ describe('Property 3: Authentication Response Codes', () => {
           );
 
           expect(response.status).toBe(403);
-          
+
           const body = await response.json();
           expect(body).toEqual({ error: 'Forbidden' });
 
@@ -127,66 +123,58 @@ describe('Property 3: Authentication Response Codes', () => {
 
   test('attaches user to context when authentication succeeds', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        tokenArb,
-        userArb,
-        pathArb,
-        async (validToken, expectedUser, path) => {
-          const app = new Elysia();
-          
-          const mastra = createMockMastraWithAuth({
-            authenticateToken: async () => expectedUser,
-            authorize: async () => true,
-          });
+      fc.asyncProperty(tokenArb, userArb, pathArb, async (validToken, expectedUser, path) => {
+        const app = new Elysia();
 
-          const server = new ElysiaServer({ app, mastra });
-          server.registerAuthMiddleware();
+        const mastra = createMockMastraWithAuth({
+          authenticateToken: async () => expectedUser,
+          authorize: async () => true,
+        });
 
-          let attachedUser: unknown = undefined;
+        const server = new ElysiaServer({ app, mastra });
+        server.registerAuthMiddleware();
 
-          app.get(path, (context) => {
-            const ctx = context as unknown as { user: unknown };
-            attachedUser = ctx.user;
-            return { ok: true };
-          });
+        let attachedUser: unknown = undefined;
 
-          const response = await app.handle(
-            new Request(`http://localhost${path}`, {
-              headers: { Authorization: `Bearer ${validToken}` },
-            })
-          );
+        app.get(path, (context) => {
+          const ctx = context as unknown as { user: unknown };
+          attachedUser = ctx.user;
+          return { ok: true };
+        });
 
-          expect(response.status).toBe(200);
-          expect(attachedUser).toBeDefined();
-          expect(attachedUser).toEqual(expectedUser);
+        const response = await app.handle(
+          new Request(`http://localhost${path}`, {
+            headers: { Authorization: `Bearer ${validToken}` },
+          })
+        );
 
-          return true;
-        }
-      ),
+        expect(response.status).toBe(200);
+        expect(attachedUser).toBeDefined();
+        expect(attachedUser).toEqual(expectedUser);
+
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('skips auth middleware when no auth is configured', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        pathArb,
-        async (path) => {
-          const app = new Elysia();
-          const mastra = createMockMastraWithAuth(undefined);
+      fc.asyncProperty(pathArb, async (path) => {
+        const app = new Elysia();
+        const mastra = createMockMastraWithAuth(undefined);
 
-          const server = new ElysiaServer({ app, mastra });
-          server.registerAuthMiddleware();
+        const server = new ElysiaServer({ app, mastra });
+        server.registerAuthMiddleware();
 
-          app.get(path, () => ({ ok: true }));
+        app.get(path, () => ({ ok: true }));
 
-          const response = await app.handle(new Request(`http://localhost${path}`));
+        const response = await app.handle(new Request(`http://localhost${path}`));
 
-          expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
 
-          return true;
-        }
-      ),
+        return true;
+      }),
       { numRuns: 100 }
     );
   });

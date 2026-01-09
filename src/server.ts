@@ -137,11 +137,11 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
         const size = parseInt(contentLength, 10);
 
         if (!Number.isNaN(size) && size > maxSize) {
-          this.log.warn?.(
-            `Request body size ${size} exceeds limit ${maxSize}`
-          );
+          this.log.warn?.(`Request body size ${size} exceeds limit ${maxSize}`);
           set.status = 413;
-          return onError(new Error(`Request body size ${size} exceeds maximum allowed size of ${maxSize} bytes`));
+          return onError(
+            new Error(`Request body size ${size} exceeds maximum allowed size of ${maxSize} bytes`)
+          );
         }
       }
     });
@@ -171,9 +171,13 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
           // Request was already aborted
           abortController.abort(request.signal.reason);
         } else {
-          request.signal.addEventListener('abort', () => {
-            abortController.abort(request.signal.reason);
-          }, { once: true });
+          request.signal.addEventListener(
+            'abort',
+            () => {
+              abortController.abort(request.signal.reason);
+            },
+            { once: true }
+          );
         }
       }
 
@@ -234,9 +238,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
       }
 
       const authHeader = request.headers.get('authorization');
-      const token = authHeader?.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : (authHeader ?? '');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : (authHeader ?? '');
 
       if (authConfig.authenticateToken) {
         try {
@@ -363,12 +365,16 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
   /**
    * Type-safe extraction of authorize function from auth config.
    */
-  private getAuthorizeFunction(authConfig: unknown): ((
-    path: string,
-    method: string,
-    user: unknown,
-    context: unknown
-  ) => Promise<boolean> | boolean) | undefined {
+  private getAuthorizeFunction(
+    authConfig: unknown
+  ):
+    | ((
+        path: string,
+        method: string,
+        user: unknown,
+        context: unknown
+      ) => Promise<boolean> | boolean)
+    | undefined {
     if (
       authConfig &&
       typeof authConfig === 'object' &&
@@ -388,10 +394,9 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
   /**
    * Type-safe extraction of authorizeUser function from auth config.
    */
-  private getAuthorizeUserFunction(authConfig: unknown): ((
-    user: unknown,
-    request: unknown
-  ) => Promise<boolean> | boolean) | undefined {
+  private getAuthorizeUserFunction(
+    authConfig: unknown
+  ): ((user: unknown, request: unknown) => Promise<boolean> | boolean) | undefined {
     if (
       authConfig &&
       typeof authConfig === 'object' &&
@@ -435,11 +440,15 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
 
         // 2. Validate parameters with Zod schemas
         const pathParams = await this.parsePathParams(route, params.urlParams);
-        const queryParams = await this.parseQueryParams(route, params.queryParams as Record<string, string>);
+        const queryParams = await this.parseQueryParams(
+          route,
+          params.queryParams as Record<string, string>
+        );
         const body = await this.parseBody(route, params.body);
 
         // 3. Get context values from derive middleware
-        const derivedContext = context as unknown as MastraDeriveContext & Partial<MastraAuthContext>;
+        const derivedContext = context as unknown as MastraDeriveContext &
+          Partial<MastraAuthContext>;
 
         // 4. Merge body requestContext if present
         let requestContext = derivedContext.requestContext;
@@ -562,10 +571,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
    * @param request - The Elysia context containing params, query, and body
    * @returns Extracted parameters object with urlParams, queryParams, and body
    */
-  async getParams(
-    _route: ServerRoute,
-    request: Context
-  ): Promise<ExtractedParams> {
+  async getParams(_route: ServerRoute, request: Context): Promise<ExtractedParams> {
     interface ElysiaRequestContext {
       params?: Record<string, string>;
       query?: Record<string, string | string[]>;
@@ -623,7 +629,9 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
     options: { prefix?: string }
   ): Promise<void> {
     await super.registerOpenAPIRoute(app, config, options);
-    this.log.debug?.(`OpenAPI route registered at ${options.prefix ?? ''}${config.path ?? '/openapi.json'}`);
+    this.log.debug?.(
+      `OpenAPI route registered at ${options.prefix ?? ''}${config.path ?? '/openapi.json'}`
+    );
   }
 
   /**
@@ -640,11 +648,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
    * @param response - The Elysia context
    * @param result - The result from the route handler
    */
-  async sendResponse(
-    route: ServerRoute,
-    response: Context,
-    result: unknown
-  ): Promise<unknown> {
+  async sendResponse(route: ServerRoute, response: Context, result: unknown): Promise<unknown> {
     const responseType = route.responseType as string;
 
     switch (responseType) {
@@ -716,18 +720,12 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
 
     // If the result has a stream, use it
     if (mcpResult.stream) {
-      return this.stream(
-        { ...route, streamFormat: 'sse' },
-        response,
-        { fullStream: mcpResult.stream }
-      );
+      return this.stream({ ...route, streamFormat: 'sse' }, response, {
+        fullStream: mcpResult.stream,
+      });
     }
 
-    return this.stream(
-      { ...route, streamFormat: 'sse' },
-      response,
-      result
-    );
+    return this.stream({ ...route, streamFormat: 'sse' }, response, result);
   }
 
   /**
@@ -742,11 +740,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
    * @param result - The streaming result with fullStream property
    * @returns A Response object with the streaming body
    */
-  async stream(
-    route: ServerRoute,
-    _response: Context,
-    result: unknown
-  ): Promise<unknown> {
+  async stream(route: ServerRoute, _response: Context, result: unknown): Promise<unknown> {
     const isSSE = route.streamFormat === 'sse';
 
     const streamResult = result as StreamResult;
@@ -776,9 +770,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
           }
 
           // Apply redaction if enabled
-          const processedChunk = shouldRedact
-            ? redactStreamChunk(value)
-            : value;
+          const processedChunk = shouldRedact ? redactStreamChunk(value) : value;
 
           // Format based on stream format
           let formattedChunk: string;
@@ -806,7 +798,7 @@ export class ElysiaServer extends MastraServer<AnyElysia, Context, Context> {
       'Content-Type': isSSE ? 'text/event-stream' : 'text/plain',
       'Transfer-Encoding': 'chunked',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
     };
 
     if (isSSE) {

@@ -57,7 +57,7 @@ const app2 = new Elysia()
 
 // Create ElysiaServer for Mastra's built-in routes
 const server = new ElysiaServer({
-  app: app2 ,
+  app: app2,
   mastra: mastraInstance,
   prefix: '/api',
   bodyLimitOptions: {
@@ -71,7 +71,6 @@ const server = new ElysiaServer({
 
 // Register Mastra routes (skip context middleware since plugin already added it)
 await server.registerRoutes();
-
 
 const port = process.env.PORT || 3000;
 app2.listen(port);

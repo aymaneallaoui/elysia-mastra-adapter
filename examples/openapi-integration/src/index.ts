@@ -218,9 +218,7 @@ app.group('/users', (app) =>
         query: t.Object({
           page: t.Optional(t.Numeric({ minimum: 1, default: 1 })),
           limit: t.Optional(t.Numeric({ minimum: 1, maximum: 100, default: 10 })),
-          role: t.Optional(
-            t.Union([t.Literal('admin'), t.Literal('user'), t.Literal('guest')])
-          ),
+          role: t.Optional(t.Union([t.Literal('admin'), t.Literal('user'), t.Literal('guest')])),
         }),
         detail: {
           tags: ['Users'],
@@ -275,10 +273,9 @@ app.group('/users', (app) =>
         body: t.Object({
           name: t.String({ minLength: 1, maxLength: 100, description: 'User full name' }),
           email: t.String({ format: 'email', description: 'User email address' }),
-          role: t.Union(
-            [t.Literal('admin'), t.Literal('user'), t.Literal('guest')],
-            { description: 'User role' }
-          ),
+          role: t.Union([t.Literal('admin'), t.Literal('user'), t.Literal('guest')], {
+            description: 'User role',
+          }),
         }),
         detail: {
           tags: ['Users'],
@@ -299,7 +296,7 @@ app.group('/users', (app) =>
 app.post(
   '/tools/:toolName/execute',
   async (context) => {
-    const { params, body, tools, set } = context 
+    const { params, body, tools, set } = context;
 
     const toolName = params.toolName;
 

@@ -68,12 +68,14 @@ const customTools = {
           return { result: text.toLowerCase(), operation: 'Converted to lowercase' };
         case 'reverse':
           return { result: text.split('').reverse().join(''), operation: 'Text reversed' };
-        case 'wordcount':
-          { const wordCount = text.trim().split(/\s+/).length;
-          return { result: wordCount, operation: `Counted ${wordCount} words` }; }
-        case 'summary':
-          { const summary = text.length > 100 ? text.substring(0, 100) + '...' : text;
-          return { result: summary, operation: 'Generated summary' }; }
+        case 'wordcount': {
+          const wordCount = text.trim().split(/\s+/).length;
+          return { result: wordCount, operation: `Counted ${wordCount} words` };
+        }
+        case 'summary': {
+          const summary = text.length > 100 ? text.substring(0, 100) + '...' : text;
+          return { result: summary, operation: 'Generated summary' };
+        }
         default:
           throw new Error(`Unknown operation: ${operation}`);
       }

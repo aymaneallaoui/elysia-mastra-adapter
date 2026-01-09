@@ -27,15 +27,15 @@ app.get('/events', async function* ({ set, query }) {
   const interval = parseInt(query.interval as string) || 1000;
   const count = parseInt(query.count as string) || 10;
 
-  yield `data: ${JSON.stringify({ 
-    type: 'connected', 
+  yield `data: ${JSON.stringify({
+    type: 'connected',
     message: 'Connected to event stream',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })}\n\n`;
 
   for (let i = 1; i <= count; i++) {
-    await new Promise(resolve => setTimeout(resolve, interval));
-    
+    await new Promise((resolve) => setTimeout(resolve, interval));
+
     const event = {
       type: 'update',
       id: i,
@@ -50,10 +50,10 @@ app.get('/events', async function* ({ set, query }) {
     yield `data: ${JSON.stringify(event)}\n\n`;
   }
 
-  yield `data: ${JSON.stringify({ 
-    type: 'complete', 
+  yield `data: ${JSON.stringify({
+    type: 'complete',
     message: 'Stream completed',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })}\n\n`;
 });
 
@@ -67,32 +67,32 @@ app.post('/chat/stream', async function* ({ body, set }) {
   const response = `I understand you said: "${message}". Let me provide a detailed response about that topic.`;
   const words = response.split(' ');
 
-  yield `data: ${JSON.stringify({ 
-    type: 'start', 
+  yield `data: ${JSON.stringify({
+    type: 'start',
     message: 'Starting response...',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })}\n\n`;
 
   let accumulated = '';
   for (let i = 0; i < words.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 200));
+
     accumulated += (i > 0 ? ' ' : '') + words[i];
-    
+
     yield `data: ${JSON.stringify({
       type: 'token',
       token: words[i],
       accumulated,
       progress: ((i + 1) / words.length) * 100,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })}\n\n`;
   }
 
-  yield `data: ${JSON.stringify({ 
-    type: 'complete', 
+  yield `data: ${JSON.stringify({
+    type: 'complete',
     message: 'Response completed',
     final_text: accumulated,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })}\n\n`;
 });
 
@@ -104,8 +104,8 @@ app.get('/data/stream', async function* ({ set, query }) {
   const delay = parseInt(query.delay as string) || 500;
 
   for (let i = 1; i <= count; i++) {
-    await new Promise(resolve => setTimeout(resolve, delay));
-    
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
     const data = {
       id: i,
       timestamp: new Date().toISOString(),
@@ -122,44 +122,52 @@ app.get('/data/stream', async function* ({ set, query }) {
 app.ws('/ws', {
   open(ws) {
     console.log('WebSocket connection opened');
-    ws.send(JSON.stringify({ 
-      type: 'connected', 
-      message: 'WebSocket connection established',
-      timestamp: new Date().toISOString()
-    }));
+    ws.send(
+      JSON.stringify({
+        type: 'connected',
+        message: 'WebSocket connection established',
+        timestamp: new Date().toISOString(),
+      })
+    );
   },
-  
+
   message(ws, message) {
     console.log('Received message:', message);
-    
+
     try {
       const data = JSON.parse(message as string);
-      
-      ws.send(JSON.stringify({
-        type: 'echo',
-        original: data,
-        timestamp: new Date().toISOString(),
-        response: `Received: ${data.message || 'No message'}`,
-      }));
-      
-      setTimeout(() => {
-        ws.send(JSON.stringify({
-          type: 'followup',
-          message: 'This is a delayed follow-up message',
+
+      ws.send(
+        JSON.stringify({
+          type: 'echo',
+          original: data,
           timestamp: new Date().toISOString(),
-        }));
+          response: `Received: ${data.message || 'No message'}`,
+        })
+      );
+
+      setTimeout(() => {
+        ws.send(
+          JSON.stringify({
+            type: 'followup',
+            message: 'This is a delayed follow-up message',
+            timestamp: new Date().toISOString(),
+          })
+        );
       }, 2000);
-      
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      ws.send(JSON.stringify({
-        type: 'error',
-        message: 'Invalid JSON format',
-        timestamp: new Date().toISOString(),
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Invalid JSON format',
+          timestamp: new Date().toISOString(),
+        })
+      );
     }
   },
-  
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   close(ws) {
     console.log('WebSocket connection closed');
@@ -167,7 +175,8 @@ app.ws('/ws', {
 });
 
 app.get('/', () => {
-  return new Response(`
+  return new Response(
+    `
 <!DOCTYPE html>
 <html>
 <head>
@@ -312,9 +321,11 @@ app.get('/', () => {
     </script>
 </body>
 </html>
-  `, {
-    headers: { 'Content-Type': 'text/html' }
-  });
+  `,
+    {
+      headers: { 'Content-Type': 'text/html' },
+    }
+  );
 });
 
 app.get('/health', () => ({

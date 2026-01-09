@@ -15,7 +15,7 @@ const createToken = (userId: string): string => {
 
   const base64Header = btoa(JSON.stringify(header));
   const base64Payload = btoa(JSON.stringify(payload));
-  const signature = btoa(`${base64Header}.${base64Payload}.${JWT_SECRET}`); 
+  const signature = btoa(`${base64Header}.${base64Payload}.${JWT_SECRET}`);
 
   return `${base64Header}.${base64Payload}.${signature}`;
 };

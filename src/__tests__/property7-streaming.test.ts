@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * Property-based tests for ElysiaServer - Property 7: Streaming Headers and Format
- * 
+ *
  * Uses fast-check to verify universal properties across many generated inputs.
  */
 
@@ -13,7 +14,7 @@ import type { ServerRoute } from '@mastra/server/server-adapter';
 
 /**
  * Feature: elysia-mastra-adapter, Property 7: Streaming Headers and Format
- * 
+ *
  * For any streaming response:
  * - If SSE format, Content-Type SHALL be `text/event-stream`
  * - Transfer-Encoding SHALL be `chunked`
@@ -46,20 +47,16 @@ describe('Property 7: Streaming Headers and Format', () => {
   };
 
   // Helper to create a streaming route with proper type assertion
-  const createStreamRoute = (
-    path: string, 
-    chunks: unknown[], 
-    streamFormat: 'sse' | 'ndjson'
-  ) => ({
-    path,
-    method: 'GET' as const,
-    handler: async () => ({
-      fullStream: createMockStream(chunks),
-    }),
-    responseType: 'stream' as const,
-    streamFormat,
-  }) as unknown as ServerRoute;
-
+  const createStreamRoute = (path: string, chunks: unknown[], streamFormat: 'sse' | 'ndjson') =>
+    ({
+      path,
+      method: 'GET' as const,
+      handler: async () => ({
+        fullStream: createMockStream(chunks),
+      }),
+      responseType: 'stream' as const,
+      streamFormat,
+    }) as unknown as ServerRoute;
 
   const streamChunkArb = fc.record({
     type: fc.constantFrom('text', 'data', 'event'),
@@ -77,48 +74,48 @@ describe('Property 7: Streaming Headers and Format', () => {
 
   test('SSE format sets Content-Type to text/event-stream', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        streamChunksArb,
-        pathArb,
-        async (chunks, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
-          const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
-          server.registerContextMiddleware();
+      fc.asyncProperty(streamChunksArb, pathArb, async (chunks, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
+        const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
+        server.registerContextMiddleware();
 
-          const route = createStreamRoute(path, chunks, 'sse');
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+        const route = createStreamRoute(path, chunks, 'sse');
+        const mockContext = {
+          set: { status: 200, headers: {} as Record<string, string> },
+        } as Context;
+        const result = await server.stream(route, mockContext, {
+          fullStream: createMockStream(chunks),
+        });
 
-          expect(result).toBeInstanceOf(Response);
-          expect((result as Response).headers.get('Content-Type')).toBe('text/event-stream');
-          return true;
-        }
-      ),
+        expect(result).toBeInstanceOf(Response);
+        expect((result as Response).headers.get('Content-Type')).toBe('text/event-stream');
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('ndjson format sets Content-Type to text/plain', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        streamChunksArb,
-        pathArb,
-        async (chunks, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
-          const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
-          server.registerContextMiddleware();
+      fc.asyncProperty(streamChunksArb, pathArb, async (chunks, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
+        const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
+        server.registerContextMiddleware();
 
-          const route = createStreamRoute(path, chunks, 'ndjson');
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+        const route = createStreamRoute(path, chunks, 'ndjson');
+        const mockContext = {
+          set: { status: 200, headers: {} as Record<string, string> },
+        } as Context;
+        const result = await server.stream(route, mockContext, {
+          fullStream: createMockStream(chunks),
+        });
 
-          expect(result).toBeInstanceOf(Response);
-          expect((result as Response).headers.get('Content-Type')).toBe('text/plain');
-          return true;
-        }
-      ),
+        expect(result).toBeInstanceOf(Response);
+        expect((result as Response).headers.get('Content-Type')).toBe('text/plain');
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
@@ -136,8 +133,12 @@ describe('Property 7: Streaming Headers and Format', () => {
           server.registerContextMiddleware();
 
           const route = createStreamRoute(path, chunks, streamFormat);
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+          const mockContext = {
+            set: { status: 200, headers: {} as Record<string, string> },
+          } as Context;
+          const result = await server.stream(route, mockContext, {
+            fullStream: createMockStream(chunks),
+          });
 
           expect(result).toBeInstanceOf(Response);
           expect((result as Response).headers.get('Transfer-Encoding')).toBe('chunked');
@@ -148,123 +149,121 @@ describe('Property 7: Streaming Headers and Format', () => {
     );
   });
 
-
   test('SSE format sends completion marker [DONE] when stream ends', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        streamChunksArb,
-        pathArb,
-        async (chunks, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
-          const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
-          server.registerContextMiddleware();
+      fc.asyncProperty(streamChunksArb, pathArb, async (chunks, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
+        const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
+        server.registerContextMiddleware();
 
-          const route = createStreamRoute(path, chunks, 'sse');
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+        const route = createStreamRoute(path, chunks, 'sse');
+        const mockContext = {
+          set: { status: 200, headers: {} as Record<string, string> },
+        } as Context;
+        const result = await server.stream(route, mockContext, {
+          fullStream: createMockStream(chunks),
+        });
 
-          expect(result).toBeInstanceOf(Response);
-          const response = result as Response;
-          const reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let fullContent = '';
+        expect(result).toBeInstanceOf(Response);
+        const response = result as Response;
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            fullContent += decoder.decode(value, { stream: true });
-          }
-
-          expect(fullContent).toContain('data: [DONE]');
-          return true;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullContent += decoder.decode(value, { stream: true });
         }
-      ),
+
+        expect(fullContent).toContain('data: [DONE]');
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('SSE format outputs data in correct SSE format (data: {json}\\n\\n)', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        streamChunksArb,
-        pathArb,
-        async (chunks, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
-          const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
-          server.registerContextMiddleware();
+      fc.asyncProperty(streamChunksArb, pathArb, async (chunks, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
+        const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
+        server.registerContextMiddleware();
 
-          const route = createStreamRoute(path, chunks, 'sse');
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+        const route = createStreamRoute(path, chunks, 'sse');
+        const mockContext = {
+          set: { status: 200, headers: {} as Record<string, string> },
+        } as Context;
+        const result = await server.stream(route, mockContext, {
+          fullStream: createMockStream(chunks),
+        });
 
-          expect(result).toBeInstanceOf(Response);
-          const response = result as Response;
-          const reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let fullContent = '';
+        expect(result).toBeInstanceOf(Response);
+        const response = result as Response;
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            fullContent += decoder.decode(value, { stream: true });
-          }
-
-          const events = fullContent.split('\n\n').filter(e => e.trim());
-          for (const event of events) {
-            expect(event.startsWith('data: ')).toBe(true);
-            const jsonPart = event.slice(6);
-            if (jsonPart !== '[DONE]') {
-              expect(() => JSON.parse(jsonPart)).not.toThrow();
-            }
-          }
-          return true;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullContent += decoder.decode(value, { stream: true });
         }
-      ),
+
+        const events = fullContent.split('\n\n').filter((e) => e.trim());
+        for (const event of events) {
+          expect(event.startsWith('data: ')).toBe(true);
+          const jsonPart = event.slice(6);
+          if (jsonPart !== '[DONE]') {
+            expect(() => JSON.parse(jsonPart)).not.toThrow();
+          }
+        }
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
 
   test('ndjson format outputs data with record separator', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        streamChunksArb,
-        pathArb,
-        async (chunks, path) => {
-          const app = new Elysia();
-          const mastra = createMockMastra();
-          const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
-          server.registerContextMiddleware();
+      fc.asyncProperty(streamChunksArb, pathArb, async (chunks, path) => {
+        const app = new Elysia();
+        const mastra = createMockMastra();
+        const server = new ElysiaServer({ app, mastra, streamOptions: { redact: false } });
+        server.registerContextMiddleware();
 
-          const route = createStreamRoute(path, chunks, 'ndjson');
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+        const route = createStreamRoute(path, chunks, 'ndjson');
+        const mockContext = {
+          set: { status: 200, headers: {} as Record<string, string> },
+        } as Context;
+        const result = await server.stream(route, mockContext, {
+          fullStream: createMockStream(chunks),
+        });
 
-          expect(result).toBeInstanceOf(Response);
-          const response = result as Response;
-          const reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let fullContent = '';
+        expect(result).toBeInstanceOf(Response);
+        const response = result as Response;
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            fullContent += decoder.decode(value, { stream: true });
-          }
-
-          const records = fullContent.split('\x1E').filter(r => r.trim());
-          for (const record of records) {
-            expect(() => JSON.parse(record)).not.toThrow();
-          }
-          expect(records.length).toBe(chunks.length);
-          return true;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullContent += decoder.decode(value, { stream: true });
         }
-      ),
+
+        const records = fullContent.split('\x1E').filter((r) => r.trim());
+        for (const record of records) {
+          expect(() => JSON.parse(record)).not.toThrow();
+        }
+        expect(records.length).toBe(chunks.length);
+        return true;
+      }),
       { numRuns: 100 }
     );
   });
-
 
   test('streaming sets Cache-Control to no-cache', async () => {
     await fc.assert(
@@ -279,8 +278,12 @@ describe('Property 7: Streaming Headers and Format', () => {
           server.registerContextMiddleware();
 
           const route = createStreamRoute(path, chunks, streamFormat);
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+          const mockContext = {
+            set: { status: 200, headers: {} as Record<string, string> },
+          } as Context;
+          const result = await server.stream(route, mockContext, {
+            fullStream: createMockStream(chunks),
+          });
 
           expect(result).toBeInstanceOf(Response);
           expect((result as Response).headers.get('Cache-Control')).toBe('no-cache');
@@ -304,8 +307,12 @@ describe('Property 7: Streaming Headers and Format', () => {
           server.registerContextMiddleware();
 
           const route = createStreamRoute(path, chunks, streamFormat);
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+          const mockContext = {
+            set: { status: 200, headers: {} as Record<string, string> },
+          } as Context;
+          const result = await server.stream(route, mockContext, {
+            fullStream: createMockStream(chunks),
+          });
 
           expect(result).toBeInstanceOf(Response);
           expect((result as Response).headers.get('Connection')).toBe('keep-alive');
@@ -329,8 +336,12 @@ describe('Property 7: Streaming Headers and Format', () => {
           server.registerContextMiddleware();
 
           const route = createStreamRoute(path, chunks, streamFormat);
-          const mockContext = { set: { status: 200, headers: {} as Record<string, string> } } as Context;
-          const result = await server.stream(route, mockContext, { fullStream: createMockStream(chunks) });
+          const mockContext = {
+            set: { status: 200, headers: {} as Record<string, string> },
+          } as Context;
+          const result = await server.stream(route, mockContext, {
+            fullStream: createMockStream(chunks),
+          });
 
           expect(result).toBeInstanceOf(Response);
           const response = result as Response;
