@@ -1,16 +1,50 @@
 {
-  "name": "elysia-mastra-adapter",
-  "module": "index.ts",
+  "name": "elysia-mastra",
+  "version": "0.1.0",
+  "description": "Elysia server adapter for Mastra",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target bun && bun run build:types",
+    "build:types": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "bun run build",
+    "test": "bun test"
+  },
+  "keywords": [
+    "elysia",
+    "mastra",
+    "adapter",
+    "server",
+    "ai",
+    "agents",
+    "bun"
+  ],
+  "author": "",
+  "license": "MIT",
   "peerDependencies": {
-    "typescript": "^5"
+    "elysia": "^1.0.0",
+    "@mastra/server": "^1.0.0-beta.0"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0",
     "@mastra/server": "1.0.0-beta.20",
     "elysia": "^1.4.21"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
   }
 }
