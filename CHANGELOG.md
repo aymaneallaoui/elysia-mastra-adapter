@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1](https://github.com/aymaneallaoui/elysia-mastra-adapter/compare/v1.0.0...v1.0.1) (2026-01-10)
+
+### Bug Fixes
+
+* add cross-env and suppress logs in test environment ([4ea7ebb](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/4ea7ebb6e828372964a7ec6229186fc60ba1c1ea))
+
 ## 1.0.0 (2026-01-10)
 
 ### Features
