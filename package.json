@@ -1,6 +1,6 @@
 {
   "name": "elysia-mastra-adapter",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Production-ready Elysia server adapter for Mastra AI framework with full type safety",
   "type": "module",
   "main": "./dist/index.js",

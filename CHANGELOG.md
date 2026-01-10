@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.0 (2026-01-10)
+
+### Features
+
+* add project infra and test suite ([e295aed](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/e295aed42ac6f3719ff66cdcbacadbae34dca613))
+* implement server adapter with core functionality ([0141461](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/0141461d821e255a6497f67d3543f52b8bdf12ec))
+* init project ([5b502e9](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/5b502e936121504e999f24e55f437bacae173170))
+* migrate to semantic-release and update action versions ([827dfa0](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/827dfa055bb47c6d3409f60029a60aeadd38c746))
+
+### Bug Fixes
+
+* add conventional-changelog-conventionalcommits dependency ([a58c681](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/a58c681860cfcb69a68e477d574239b7e382402f))
+* update lock file ([b9817a6](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/b9817a6e3d2a574d92779dd68d7979dc8975a496))
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
