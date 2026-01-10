@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2](https://github.com/aymaneallaoui/elysia-mastra-adapter/compare/v1.0.1...v1.0.2) (2026-01-10)
+
+### Bug Fixes
+
+* **package:** add project metadata and repository information ([ab0708c](https://github.com/aymaneallaoui/elysia-mastra-adapter/commit/ab0708c7078407e05edaf8ce4290360bcacd6486))
+
 ## [1.0.1](https://github.com/aymaneallaoui/elysia-mastra-adapter/compare/v1.0.0...v1.0.1) (2026-01-10)
 
 ### Bug Fixes
