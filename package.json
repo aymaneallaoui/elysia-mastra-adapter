@@ -49,16 +49,16 @@
     "mcp",
     "llm"
   ],
-  "author": "",
+  "author": "Aymane Allaoui <aymaneallaoui@github>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/aymaneallaoui/elysia-mastra-adapter"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/aymaneallaoui/elysia-mastra-adapter/issues"
   },
-  "homepage": "",
+  "homepage": "https://github.com/aymaneallaoui/elysia-mastra-adapter#readme",
   "engines": {
     "node": ">=18.0.0"
   },
