@@ -4,9 +4,9 @@ A production-ready server adapter for running [Mastra](https://mastra.ai) with t
 
 ## Features
 
-- **Full Type Safety** - Properly typed context with `ElysiaContext` for route handlers - no more `as any`!
+- **Full Type Safety** - Properly typed context for route handlers
 - **Complete Response Handling** - JSON, streaming (SSE/ndjson), AI SDK datastream, and MCP transport support
-- **Production Ready** - Body size limits, request lifecycle management, comprehensive logging
+- **Production Ready** - (kinda of) Body size limits, request lifecycle management, comprehensive logging
 - **Authentication** - Built-in auth middleware with per-route overrides via `customRouteAuthConfig`
 - **Request Cancellation** - AbortSignal properly connected to request lifecycle
 - **Stream Redaction** - Sensitive data automatically redacted from stream responses
