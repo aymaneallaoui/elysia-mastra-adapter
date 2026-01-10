@@ -12,18 +12,28 @@ import type {
   BodyLimitOptions,
 } from './types';
 
+const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.BUN_ENV === 'test';
+
 const defaultLogger: MastraLogger = {
   error: (message: string, error?: unknown) => {
-    console.error(`[ElysiaServer] ${message}`, error ?? '');
+    if (!isTestEnvironment) {
+      console.error(`[ElysiaServer] ${message}`, error ?? '');
+    }
   },
   warn: (message: string) => {
-    console.warn(`[ElysiaServer] ${message}`);
+    if (!isTestEnvironment) {
+      console.warn(`[ElysiaServer] ${message}`);
+    }
   },
   info: (message: string) => {
-    console.info(`[ElysiaServer] ${message}`);
+    if (!isTestEnvironment) {
+      console.info(`[ElysiaServer] ${message}`);
+    }
   },
   debug: (message: string) => {
-    console.debug(`[ElysiaServer] ${message}`);
+    if (!isTestEnvironment) {
+      console.debug(`[ElysiaServer] ${message}`);
+    }
   },
 };
 
